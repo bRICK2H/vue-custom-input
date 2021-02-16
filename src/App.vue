@@ -1,5 +1,14 @@
 <template>
-	<div id="app">
+	<div id="app"
+		@mousemove="cursor"
+	>
+		<!-- Cursor -->
+		<div class="cursor"
+			:class="getClassHiddenCursor"
+			:style="getStyleCoordinatesToCursor"
+		></div>
+
+		<!-- Input -->
 		<div class="input-container"
 			:class="[getClassOuterShadowContainer, getClassInnerShadowContainer]"
 		>
@@ -20,7 +29,7 @@
 				:style="getStyleOffsetHeight"
 				:value="fullValue"
 				@input="onInput"
-				@focus="isFocus = true"
+				@focus="onFocus"
 				@blur="onBlur"
 				@keydown.enter.prevent=""
 			></textarea>
@@ -81,6 +90,9 @@ export default {
 		isdoubleSlashPlaceholder: true,
 		isAnimateDisplay: false,
 		isSpace: true,
+		isOpenInput: false,
+		cursorCoX: 0,
+		cursorCoY: 0
 	}),
 	computed: {
 		getStyleOffsetHeight() {
@@ -106,6 +118,12 @@ export default {
 			if (this.isAnimateDisplay) {
 				return { display: 'inline' };
 			}
+		},
+		getStyleCoordinatesToCursor() {
+			return { left: `${this.cursorCoX}px`, top: `${this.cursorCoY}px` }
+		},
+		getClassHiddenCursor() {
+			return { 'cursor--hidden': this.isOpenInput }
 		}
 	},
 	methods: {
@@ -164,6 +182,17 @@ export default {
 				this.mirrorValue = 'Write a new task';
 			}
 		},
+		onFocus() {
+			this.isFocus = true;
+			this.isOpenInput = true;
+			setTimeout(() => {
+				this.isOpenInput = false;
+			}, 800)
+		},
+		cursor(event) {
+			this.cursorCoX = event.clientX;
+			this.cursorCoY = event.clientY;
+		}
 	},
 	watch: {
 		isDoubleSlash() {
@@ -460,6 +489,25 @@ export default {
 			&::after {
 				right: .1rem;
 				transform: translateY(-50%) rotate(-45deg);
+			}
+		}
+	}
+	.cursor {
+		width: 5rem;
+		height: 5rem;
+		background: rgba(82, 92, 107, .3);
+		border-radius: 50%;
+		position: absolute;
+		transform: translate(-50%, -50%);
+
+		&--hidden {
+			z-index: 1;
+			animation: hide-cursor .8s forwards;
+
+			@keyframes hide-cursor {
+				0% { width: 3.5rem; height: 3.5rem; }
+				70% {width: 5rem; height: 5rem; }
+				100% {width: 5rem; height: 5rem; opacity: 0; z-index: 1;}
 			}
 		}
 	}
